@@ -1,0 +1,158 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pyramid of Numbers</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Noto+Sans+Egyptian+Hieroglyphs&display=swap">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+
+<div class="wrap">
+
+  <!-- ================= SETUP ================= -->
+  <section id="screen-setup" class="wrap" aria-labelledby="title">
+    <header class="title">
+      <img class="logo" src="logo.svg" alt="" width="112" height="112">
+      <h1 id="title">PYRAMID OF NUMBERS</h1>
+      <p>Pick one stone on each level and answer its sum. Climb to the capstone. Get one wrong and the sands shift you back to the base.</p>
+    </header>
+
+    <div class="setup-grid">
+      <form class="panel settings" id="setup-form" autocomplete="off">
+        <div class="field">
+          <label class="label" for="player-name">Player name</label>
+          <input class="name-input" id="player-name" maxlength="12" placeholder="TYPE YOUR NAME" spellcheck="false">
+          <div class="chips" id="name-chips" aria-label="Recent players"></div>
+        </div>
+
+        <div class="field">
+          <div class="row-btns" style="justify-content:space-between">
+            <span class="label" id="tables-label">Times tables</span>
+            <span class="row-btns">
+              <button type="button" class="btn small ghost" id="tables-all">ALL</button>
+              <button type="button" class="btn small ghost" id="tables-none">CLEAR</button>
+            </span>
+          </div>
+          <div class="tables" id="tables" role="group" aria-labelledby="tables-label"></div>
+        </div>
+
+        <div class="field">
+          <span class="label" id="ops-label">Sums</span>
+          <div class="seg" id="ops" role="group" aria-labelledby="ops-label">
+            <button type="button" data-op="mul">× TIMES</button>
+            <button type="button" data-op="div">÷ DIVIDE</button>
+            <button type="button" data-op="mix">BOTH</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="label" id="levels-label">Pyramid levels</span>
+          <div class="stepper" role="group" aria-labelledby="levels-label">
+            <button type="button" class="btn small" id="lv-down" aria-label="Fewer levels">−</button>
+            <output id="lv-out">5</output>
+            <button type="button" class="btn small" id="lv-up" aria-label="More levels">+</button>
+            <div class="mini-pyr" id="mini-pyr" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="label" id="timer-label">Answer timer</span>
+          <div class="timer-row">
+            <div class="seg" role="group" aria-labelledby="timer-label">
+              <button type="button" id="timer-off">OFF</button>
+              <button type="button" id="timer-on">ON</button>
+            </div>
+            <input type="range" id="timer-range" min="5" max="20" step="1" value="10" aria-label="Seconds per answer">
+            <output id="timer-out">10 SEC</output>
+          </div>
+        </div>
+
+        <div class="field">
+          <button type="submit" class="btn gold start" id="start-btn">PRESS START</button>
+          <div class="err" id="setup-err" role="alert"></div>
+          <div class="scoring"><b>+100</b> per right answer, up to <b>+50</b> extra for speed, <b>−50</b> and back to the base for a wrong one.</div>
+        </div>
+      </form>
+
+      <aside class="panel hall" aria-labelledby="hall-title">
+        <h2 id="hall-title">HALL OF PHARAOHS</h2>
+        <ol id="hall-list"></ol>
+        <div class="foot">
+          <button type="button" class="btn" id="to-records">SEE PROGRESS</button>
+          <div class="store-note" id="store-note"></div>
+          <button type="button" class="btn small ghost" id="mute-btn" aria-pressed="false">SOUND: ON</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ================= GAME ================= -->
+  <section id="screen-game" class="wrap" hidden aria-label="Game">
+    <div class="hud">
+      <div class="stat who"><span>PLAYER</span><span id="hud-name">-</span></div>
+      <div class="stat"><span>SCORE</span><span id="hud-score">000000</span></div>
+      <div class="stat"><span>TIME</span><span id="hud-time">00:00</span></div>
+      <div class="stat"><span>LEVEL</span><span id="hud-level">1/5</span></div>
+      <div class="stat"><span>RESETS</span><span id="hud-resets">0</span></div>
+      <div class="quit-box" id="quit-box">
+        <button type="button" class="btn small ghost" id="quit-btn">QUIT</button>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="msg" id="msg" aria-live="polite">Pick a stone on level 1.</div>
+      <div id="pyramid"></div>
+    </div>
+
+    <div class="panel console">
+      <div class="q-area">
+        <div class="q idle" id="q">CHOOSE A GLOWING STONE</div>
+        <div class="ans" id="ans" aria-live="polite"></div>
+        <div class="tbar" id="tbar" hidden><i id="tbar-fill"></i></div>
+        <div class="tlabel" id="tlabel" hidden></div>
+      </div>
+      <div class="keypad" id="keypad">
+        <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
+        <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
+        <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
+        <button type="button" data-k="del" class="del" aria-label="Delete">DEL</button><button type="button" data-k="0">0</button><button type="button" data-k="go" class="go">GO</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= RECORDS ================= -->
+  <section id="screen-records" class="wrap rec" hidden aria-labelledby="rec-title">
+    <div class="rec-head">
+      <h1 id="rec-title">HALL OF RECORDS</h1>
+      <div class="row-btns">
+        <label class="label" for="rec-player">Player</label>
+        <select id="rec-player"></select>
+        <button type="button" class="btn small" id="rec-back">BACK</button>
+      </div>
+    </div>
+    <div class="tiles" id="rec-tiles"></div>
+    <div class="panel charts" id="rec-charts"></div>
+    <div class="panel">
+      <h2>EVERY CLIMB</h2>
+      <div class="tbl-wrap" id="rec-table"></div>
+    </div>
+  </section>
+</div>
+
+<div class="overlay" id="finish" hidden role="dialog" aria-modal="true" aria-labelledby="win-title">
+  <div class="panel win">
+    <div class="capstone" aria-hidden="true"></div>
+    <h2 id="win-title">CAPSTONE REACHED!</h2>
+    <div id="win-badges" class="row-btns" style="justify-content:center"></div>
+    <div class="win-stats" id="win-stats"></div>
+    <div class="store-note" id="win-save"></div>
+    <div class="row-btns">
+      <button type="button" class="btn gold" id="again-btn">PLAY AGAIN</button>
+      <button type="button" class="btn" id="win-records">PROGRESS</button>
+      <button type="button" class="btn ghost" id="win-menu">MENU</button>
+    </div>
+  </div>
+</div>
+
+<script src="game.js"></script>

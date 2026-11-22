@@ -29,7 +29,8 @@ Every finished climb is recorded (player, score, time, resets and settings). The
 | `style.css` | All styling, animations and responsive layout |
 | `game.js` | Game logic, sounds, score storage and the progress charts |
 | `logo.svg` | The logo, shown on the title screen |
-| `logo-1024.png` | The logo as a 1024px app icon (paste it onto the installed Chrome app) |
+| `logo-1024.png` | The logo as a 1024px app icon |
+| `set-app-icon.sh` | Puts the logo on the Chrome-installed Mac app |
 
 No build step and no dependencies. Fonts load from Google Fonts.
 
@@ -44,3 +45,10 @@ python3 -m http.server 8765
 ```
 
 Then open http://localhost:8765.
+
+## Mac app with the pyramid icon
+
+1. Open the game link in Chrome and click **Install** in the address bar.
+2. Run `./set-app-icon.sh` to give the installed app the pyramid logo.
+
+Chrome may rebuild its app files after an update and bring back its own icon; run the script again if that happens.
